@@ -39,6 +39,7 @@
     <div class="mt-[70px] p-6 sm:ml-64">
         @yield('content')
     </div>
+
     {{-- Flowbite --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
 

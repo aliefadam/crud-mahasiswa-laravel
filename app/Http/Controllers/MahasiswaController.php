@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 class MahasiswaController extends Controller
@@ -61,11 +62,21 @@ class MahasiswaController extends Controller
             "foto" => $namaFoto,
         ]);
 
-        return redirect()->route("mahasiswa.index")->with("message", "Berhasil Menambah Data Mahasiswa");
+        return redirect()->route("mahasiswa.index")->with("message", [
+            "jenis" => "success",
+            "pesan" => "Berhasil Menambah Data Mahasiswa",
+        ]);
     }
 
     public function edit(Mahasiswa $mahasiswa)
     {
+        if (Gate::denies('update-mahasiswa', $mahasiswa)) {
+            return redirect()->back()->with("message", [
+                "jenis" => "error",
+                "pesan" => "Anda tidak diizinkan untuk melakukan edit",
+            ]);
+        }
+
         return view("edit", [
             "title" => "Edit Mahasiswa",
             "mahasiswa" => $mahasiswa
@@ -115,15 +126,36 @@ class MahasiswaController extends Controller
         }
 
         $mahasiswa->update($dataUpdate);
-        return redirect()->route("mahasiswa.index")->with("message", "Berhasil Merubah Data Mahasiswa");
+        return redirect()->route("mahasiswa.index")->with("message", [
+            "jenis" => "success",
+            "pesan" => "Berhasil Merubah Data Mahasiswa",
+        ]);
     }
 
     public function delete(Mahasiswa $mahasiswa)
     {
+        if (Gate::denies('delete-mahasiswa', $mahasiswa)) {
+            return redirect()->back()->with("message", [
+                "jenis" => "error",
+                "pesan" => "Anda tidak diizinkan untuk melakukan hapus",
+            ]);
+        }
+
         $mahasiswa->delete();
         if ($mahasiswa->foto) {
             Storage::delete("public/uploads/" . $mahasiswa->foto);
         }
-        return redirect()->route("mahasiswa.index")->with("message", "Data Mahasiswa Berhasil Dihapus");
+        return redirect()->route("mahasiswa.index")->with("message", [
+            "jenis" => "success",
+            "pesan" => "Berhasil Menghapus Data Mahasiswa",
+        ]);
+    }
+
+    public function denied_action()
+    {
+        return redirect()->back()->with("message", [
+            "jenis" => "error",
+            "pesan" => "Anda tidak diizinkan untuk melakukan hapus",
+        ]);
     }
 }
